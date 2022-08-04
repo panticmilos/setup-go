@@ -10,6 +10,7 @@ import fs from 'fs';
 
 export async function run() {
   try {
+    let arch = core.getInput('architecture');
     //
     // versionSpec is optional.  If supplied, install / use from the tool cache
     // If not supplied then problem matchers will still be setup.  Useful for self-hosted.

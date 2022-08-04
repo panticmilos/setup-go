@@ -62858,13 +62858,13 @@ const httpm = __importStar(__nccwpck_require__(6255));
 const sys = __importStar(__nccwpck_require__(4300));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const os_1 = __importDefault(__nccwpck_require__(2037));
-function getGo(versionSpec, checkLatest, auth) {
+function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
     return __awaiter(this, void 0, void 0, function* () {
         let osPlat = os_1.default.platform();
         let osArch = os_1.default.arch();
         if (checkLatest) {
             core.info('Attempting to resolve the latest version from the manifest...');
-            const resolvedVersion = yield resolveVersionFromManifest(versionSpec, true, auth);
+            const resolvedVersion = yield resolveVersionFromManifest(versionSpec, true, auth, arch);
             if (resolvedVersion) {
                 versionSpec = resolvedVersion;
                 core.info(`Resolved as '${versionSpec}'`);
@@ -62888,7 +62888,7 @@ function getGo(versionSpec, checkLatest, auth) {
         // Try download from internal distribution (popular versions only)
         //
         try {
-            info = yield getInfoFromManifest(versionSpec, true, auth);
+            info = yield getInfoFromManifest(versionSpec, true, auth, arch);
             if (info) {
                 downloadPath = yield installGoVersion(info, auth);
             }
@@ -62911,13 +62911,14 @@ function getGo(versionSpec, checkLatest, auth) {
         // Download from storage.googleapis.com
         //
         if (!downloadPath) {
-            info = yield getInfoFromDist(versionSpec);
+            info = yield getInfoFromDist(versionSpec, arch);
+            core.info(`${info}, 'this is info'`);
             if (!info) {
                 throw new Error(`Unable to find Go version '${versionSpec}' for platform ${osPlat} and architecture ${osArch}.`);
             }
             try {
                 core.info('Install from dist');
-                downloadPath = yield installGoVersion(info, undefined);
+                downloadPath = yield installGoVersion(info, undefined, arch);
             }
             catch (err) {
                 throw new Error(`Failed to download version ${versionSpec}: ${err}`);
@@ -62927,10 +62928,10 @@ function getGo(versionSpec, checkLatest, auth) {
     });
 }
 exports.getGo = getGo;
-function resolveVersionFromManifest(versionSpec, stable, auth) {
+function resolveVersionFromManifest(versionSpec, stable, auth, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const info = yield getInfoFromManifest(versionSpec, stable, auth);
+            const info = yield getInfoFromManifest(versionSpec, stable, auth, arch);
             return info === null || info === void 0 ? void 0 : info.resolvedVersion;
         }
         catch (err) {
@@ -62939,7 +62940,7 @@ function resolveVersionFromManifest(versionSpec, stable, auth) {
         }
     });
 }
-function installGoVersion(info, auth) {
+function installGoVersion(info, auth, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`Acquiring ${info.resolvedVersion} from ${info.downloadUrl}`);
         // Windows requires that we keep the extension (.zip) for extraction
@@ -62954,7 +62955,7 @@ function installGoVersion(info, auth) {
             extPath = path.join(extPath, 'go');
         }
         core.info('Adding to the cache ...');
-        const cachedDir = yield tc.cacheDir(extPath, 'go', makeSemver(info.resolvedVersion));
+        const cachedDir = yield tc.cacheDir(extPath, 'go', makeSemver(info.resolvedVersion), 'armv6l');
         core.info(`Successfully cached go to ${cachedDir}`);
         return cachedDir;
     });
@@ -62973,12 +62974,12 @@ function extractGoArchive(archivePath) {
     });
 }
 exports.extractGoArchive = extractGoArchive;
-function getInfoFromManifest(versionSpec, stable, auth) {
+function getInfoFromManifest(versionSpec, stable, auth, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         let info = null;
         const releases = yield tc.getManifestFromRepo('actions', 'go-versions', auth, 'main');
         core.info(`matching ${versionSpec}...`);
-        const rel = yield tc.findFromManifest(versionSpec, stable, releases);
+        const rel = yield tc.findFromManifest(versionSpec, stable, releases, arch);
         if (rel && rel.files.length > 0) {
             info = {};
             info.type = 'manifest';
@@ -62990,14 +62991,15 @@ function getInfoFromManifest(versionSpec, stable, auth) {
     });
 }
 exports.getInfoFromManifest = getInfoFromManifest;
-function getInfoFromDist(versionSpec) {
+function getInfoFromDist(versionSpec, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         let version;
-        version = yield findMatch(versionSpec);
+        version = yield findMatch(versionSpec, arch);
         if (!version) {
             return null;
         }
         let downloadUrl = `https://storage.googleapis.com/golang/${version.files[0].filename}`;
+        core.info(downloadUrl);
         return {
             type: 'dist',
             downloadUrl: downloadUrl,
@@ -63006,9 +63008,10 @@ function getInfoFromDist(versionSpec) {
         };
     });
 }
-function findMatch(versionSpec) {
+function findMatch(versionSpec, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         let archFilter = sys.getArch();
+        archFilter = 'armv6l';
         let platFilter = sys.getPlatform();
         let result;
         let match;
@@ -63088,6 +63091,14 @@ function parseGoVersionFile(versionFilePath) {
     return contents.trim();
 }
 exports.parseGoVersionFile = parseGoVersionFile;
+function translateArchToDistUrl(arch) {
+    switch (arch) {
+        case 'arm':
+            return 'armv6l';
+        default:
+            return arch;
+    }
+}
 
 
 /***/ }),
@@ -63142,6 +63153,7 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            let arch = core.getInput('architecture');
             //
             // versionSpec is optional.  If supplied, install / use from the tool cache
             // If not supplied then problem matchers will still be setup.  Useful for self-hosted.
