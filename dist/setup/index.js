@@ -62912,7 +62912,7 @@ function getGo(versionSpec, checkLatest, auth, arch) {
         //
         if (!downloadPath) {
             info = yield getInfoFromDist(versionSpec, osArch);
-            core.info(`${info}, 'this is info'`);
+            core.info(`${osArch} ${versionSpec}, 'this is info'`);
             if (!info) {
                 throw new Error(`Unable to find Go version '${versionSpec}' for platform ${osPlat} and architecture ${osArch}.`);
             }
