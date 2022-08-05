@@ -29,7 +29,6 @@ jobs:
         uses: ./
         with:
           go-version: ${{ matrix.go }}
-          architecture: arm
 
       - name: verify go
         run: __tests__/verify-go.sh ${{ matrix.go }}
