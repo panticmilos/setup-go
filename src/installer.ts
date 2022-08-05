@@ -36,7 +36,7 @@ export async function getGo(
   arch: string
 ) {
   let osPlat: string = os.platform();
-  let osArch: string = translateArchToDistUrl(arch ? arch : os.arch());
+  let osArch: string = translateArchToDistUrl(arch ? arch : sys.getArch());
 
   if (checkLatest) {
     core.info('Attempting to resolve the latest version from the manifest...');
