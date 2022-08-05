@@ -63011,6 +63011,7 @@ function getInfoFromDist(versionSpec, arch) {
 function findMatch(versionSpec, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         let platFilter = sys.getPlatform();
+        core.info(`last ${arch}`);
         let result;
         let match;
         const dlUrl = 'https://golang.org/dl/?mode=json&include=all';

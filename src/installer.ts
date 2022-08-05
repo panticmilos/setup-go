@@ -230,6 +230,8 @@ export async function findMatch(
 ): Promise<IGoVersion | undefined> {
   let platFilter = sys.getPlatform();
 
+  core.info(`last ${arch}`);
+
   let result: IGoVersion | undefined;
   let match: IGoVersion | undefined;
 
