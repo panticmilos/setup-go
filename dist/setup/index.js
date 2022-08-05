@@ -63010,8 +63010,6 @@ function getInfoFromDist(versionSpec, arch) {
 }
 function findMatch(versionSpec, arch) {
     return __awaiter(this, void 0, void 0, function* () {
-        let archFilter = sys.getArch();
-        archFilter = 'armv6l';
         let platFilter = sys.getPlatform();
         let result;
         let match;
@@ -63027,8 +63025,8 @@ function findMatch(versionSpec, arch) {
             core.debug(`check ${version} satisfies ${versionSpec}`);
             if (semver.satisfies(version, versionSpec)) {
                 goFile = candidate.files.find(file => {
-                    core.debug(`${file.arch}===${archFilter} && ${file.os}===${platFilter}`);
-                    return file.arch === archFilter && file.os === platFilter;
+                    core.debug(`${file.arch}===${arch} && ${file.os}===${platFilter}`);
+                    return file.arch === arch && file.os === platFilter;
                 });
                 if (goFile) {
                     core.debug(`matched ${candidate.version}`);

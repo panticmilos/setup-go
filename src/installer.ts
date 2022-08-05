@@ -228,9 +228,6 @@ export async function findMatch(
   versionSpec: string,
   arch: string
 ): Promise<IGoVersion | undefined> {
-  let archFilter = sys.getArch();
-  archFilter = 'armv6l';
-
   let platFilter = sys.getPlatform();
 
   let result: IGoVersion | undefined;
@@ -253,9 +250,9 @@ export async function findMatch(
     if (semver.satisfies(version, versionSpec)) {
       goFile = candidate.files.find(file => {
         core.debug(
-          `${file.arch}===${archFilter} && ${file.os}===${platFilter}`
+          `${file.arch}===${arch} && ${file.os}===${platFilter}`
         );
-        return file.arch === archFilter && file.os === platFilter;
+        return file.arch === arch && file.os === platFilter;
       });
 
       if (goFile) {
