@@ -62861,10 +62861,10 @@ const os_1 = __importDefault(__nccwpck_require__(2037));
 function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
     return __awaiter(this, void 0, void 0, function* () {
         let osPlat = os_1.default.platform();
-        let osArch = os_1.default.arch();
+        let osArch = translateArchToDistUrl(arch);
         if (checkLatest) {
             core.info('Attempting to resolve the latest version from the manifest...');
-            const resolvedVersion = yield resolveVersionFromManifest(versionSpec, true, auth, arch);
+            const resolvedVersion = yield resolveVersionFromManifest(versionSpec, true, auth, osArch);
             if (resolvedVersion) {
                 versionSpec = resolvedVersion;
                 core.info(`Resolved as '${versionSpec}'`);
@@ -62888,9 +62888,9 @@ function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
         // Try download from internal distribution (popular versions only)
         //
         try {
-            info = yield getInfoFromManifest(versionSpec, true, auth, arch);
+            info = yield getInfoFromManifest(versionSpec, true, auth, osArch);
             if (info) {
-                downloadPath = yield installGoVersion(info, auth);
+                downloadPath = yield installGoVersion(info, auth, osArch);
             }
             else {
                 core.info('Not found in manifest.  Falling back to download directly from Go');
@@ -62911,14 +62911,14 @@ function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
         // Download from storage.googleapis.com
         //
         if (!downloadPath) {
-            info = yield getInfoFromDist(versionSpec, arch);
+            info = yield getInfoFromDist(versionSpec, osArch);
             core.info(`${info}, 'this is info'`);
             if (!info) {
                 throw new Error(`Unable to find Go version '${versionSpec}' for platform ${osPlat} and architecture ${osArch}.`);
             }
             try {
                 core.info('Install from dist');
-                downloadPath = yield installGoVersion(info, undefined, arch);
+                downloadPath = yield installGoVersion(info, undefined, osArch);
             }
             catch (err) {
                 throw new Error(`Failed to download version ${versionSpec}: ${err}`);
@@ -62955,7 +62955,7 @@ function installGoVersion(info, auth, arch) {
             extPath = path.join(extPath, 'go');
         }
         core.info('Adding to the cache ...');
-        const cachedDir = yield tc.cacheDir(extPath, 'go', makeSemver(info.resolvedVersion), 'armv6l');
+        const cachedDir = yield tc.cacheDir(extPath, 'go', makeSemver(info.resolvedVersion), arch);
         core.info(`Successfully cached go to ${cachedDir}`);
         return cachedDir;
     });
@@ -63165,7 +63165,7 @@ function run() {
                 let token = core.getInput('token');
                 let auth = !token || cache_utils_1.isGhes() ? undefined : `token ${token}`;
                 const checkLatest = core.getBooleanInput('check-latest');
-                const installDir = yield installer.getGo(versionSpec, checkLatest, auth);
+                const installDir = yield installer.getGo(versionSpec, checkLatest, auth, arch);
                 core.addPath(path_1.default.join(installDir, 'bin'));
                 core.info('Added go to the path');
                 const version = installer.makeSemver(versionSpec);

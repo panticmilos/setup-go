@@ -36,7 +36,7 @@ export async function getGo(
   arch = os.arch()
 ) {
   let osPlat: string = os.platform();
-  let osArch: string = os.arch();
+  let osArch: string = translateArchToDistUrl(arch);
 
   if (checkLatest) {
     core.info('Attempting to resolve the latest version from the manifest...');
@@ -44,7 +44,7 @@ export async function getGo(
       versionSpec,
       true,
       auth,
-      arch
+      osArch
     );
     if (resolvedVersion) {
       versionSpec = resolvedVersion;
@@ -70,9 +70,9 @@ export async function getGo(
   // Try download from internal distribution (popular versions only)
   //
   try {
-    info = await getInfoFromManifest(versionSpec, true, auth, arch);  
+    info = await getInfoFromManifest(versionSpec, true, auth, osArch);  
     if (info) {
-      downloadPath = await installGoVersion(info, auth);
+      downloadPath = await installGoVersion(info, auth, osArch);
     } else {
       core.info(
         'Not found in manifest.  Falling back to download directly from Go'
@@ -97,7 +97,7 @@ export async function getGo(
   // Download from storage.googleapis.com
   //
   if (!downloadPath) {
-    info = await getInfoFromDist(versionSpec, arch);
+    info = await getInfoFromDist(versionSpec, osArch);
     core.info(`${info}, 'this is info'`);
     if (!info) {
       throw new Error(
@@ -107,7 +107,7 @@ export async function getGo(
 
     try {
       core.info('Install from dist');
-      downloadPath = await installGoVersion(info, undefined, arch);
+      downloadPath = await installGoVersion(info, undefined, osArch);
     } catch (err) {
       throw new Error(`Failed to download version ${versionSpec}: ${err}`);
     }
@@ -157,7 +157,7 @@ async function installGoVersion(
     extPath,
     'go',
     makeSemver(info.resolvedVersion),
-    'armv6l'
+    arch
   );
   core.info(`Successfully cached go to ${cachedDir}`);
   return cachedDir;
