@@ -33,10 +33,10 @@ export async function getGo(
   versionSpec: string,
   checkLatest: boolean,
   auth: string | undefined,
-  arch = os.arch()
+  arch: string
 ) {
   let osPlat: string = os.platform();
-  let osArch: string = translateArchToDistUrl(arch);
+  let osArch: string = translateArchToDistUrl(arch ? arch : os.arch());
 
   if (checkLatest) {
     core.info('Attempting to resolve the latest version from the manifest...');

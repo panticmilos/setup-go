@@ -62858,10 +62858,10 @@ const httpm = __importStar(__nccwpck_require__(6255));
 const sys = __importStar(__nccwpck_require__(4300));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const os_1 = __importDefault(__nccwpck_require__(2037));
-function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
+function getGo(versionSpec, checkLatest, auth, arch) {
     return __awaiter(this, void 0, void 0, function* () {
         let osPlat = os_1.default.platform();
-        let osArch = translateArchToDistUrl(arch);
+        let osArch = translateArchToDistUrl(arch ? arch : os_1.default.arch());
         if (checkLatest) {
             core.info('Attempting to resolve the latest version from the manifest...');
             const resolvedVersion = yield resolveVersionFromManifest(versionSpec, true, auth, osArch);
