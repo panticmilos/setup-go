@@ -321,8 +321,8 @@ describe('setup-go', () => {
   });
 
   it('downloads a version not in the cache', async () => {
-    os.platform = 'linux';
-    os.arch = 'x64';
+    os.platform = 'windows';
+    os.arch = 'amd64';
 
     inputs['go-version'] = '1.13.1';
 
@@ -342,7 +342,7 @@ describe('setup-go', () => {
 
   it('downloads a version not in the cache (windows)', async () => {
     os.platform = 'win32';
-    os.arch = 'x64';
+    os.arch = 'amd64';
 
     inputs['go-version'] = '1.13.1';
     process.env['RUNNER_TEMP'] = 'C:\\temp\\';
@@ -455,7 +455,7 @@ describe('setup-go', () => {
 
   it('falls back to a version from node dist', async () => {
     os.platform = 'linux';
-    os.arch = 'x64';
+    os.arch = 'amd64';
 
     let versionSpec = '1.12.14';
 
@@ -493,7 +493,7 @@ describe('setup-go', () => {
   it('reports a failed download', async () => {
     let errMsg = 'unhandled download message';
     os.platform = 'linux';
-    os.arch = 'x64';
+    os.arch = 'amd64';
 
     inputs['go-version'] = '1.13.1';
 
@@ -732,7 +732,7 @@ describe('setup-go', () => {
 
     it('fallback to dist if version is not found in manifest', async () => {
       os.platform = 'linux';
-      os.arch = 'x64';
+      os.arch = 'amd64';
 
       let versionSpec = '1.13';
 
@@ -769,7 +769,7 @@ describe('setup-go', () => {
 
     it('fallback to dist if manifest is not available', async () => {
       os.platform = 'linux';
-      os.arch = 'x64';
+      os.arch = 'amd64';
 
       let versionSpec = '1.13';
 
@@ -879,5 +879,40 @@ exclude example.com/thismodule v1.3.0
         `::error::The specified go version file at: go.mod does not exist${osm.EOL}`
       );
     });
+
+    it('acquires specified architecture of go', async () => {
+      for (const {arch, version, osSpec} of [
+        {arch: 'amd64', version: '1.13.7', osSpec: 'linux'},
+        {arch: 'armv6l', version: '1.12.2', osSpec: 'linux'}
+      ]) {
+        os.platform = osSpec;
+        os.arch = arch;
+
+        const fileExtension = os.platform === 'win32' ? 'zip' : 'tar.gz';
+
+        const platform  = os.platform === 'win32' ? 'win' : os.platform;
+  
+        inputs['go-version'] = version;
+        inputs['architecture'] = arch;
+  
+        let expectedUrl =
+          platform === 'win32'
+            ? `https://github.com/actions/go-versions/releases/download/${version}/go-${version}-${platform}-${arch}.${fileExtension}`
+            : `https://storage.googleapis.com/golang/go${version}.${osSpec}-${arch}.${fileExtension}`;
+  
+        // ... but not in the local cache
+        findSpy.mockImplementation(() => '');
+  
+        dlSpy.mockImplementation(async () => '/some/temp/path');
+        let toolPath = path.normalize(`/cache/node/${version}/${arch}`);
+        cacheSpy.mockImplementation(async () => toolPath);
+  
+        await main.run()
+
+        expect(logSpy).toHaveBeenCalledWith(
+          `Acquiring go${version} from ${expectedUrl}`
+        );
+      }
+    }, 100000);
   });
 });

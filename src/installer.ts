@@ -36,7 +36,7 @@ export async function getGo(
   arch: string
 ) {
   let osPlat: string = os.platform();
-  let osArch: string = translateArchToDistUrl(arch ? arch : sys.getArch());
+  let osArch: string = translateArchToDistUrl(arch);
 
   if (checkLatest) {
     core.info('Attempting to resolve the latest version from the manifest...');
@@ -70,7 +70,7 @@ export async function getGo(
   // Try download from internal distribution (popular versions only)
   //
   try {
-    info = await getInfoFromManifest(versionSpec, true, auth, osArch);  
+      info = await getInfoFromManifest(versionSpec, true, auth, osArch);  
     if (info) {
       downloadPath = await installGoVersion(info, auth, osArch);
     } else {
@@ -180,7 +180,7 @@ export async function getInfoFromManifest(
   versionSpec: string,
   stable: boolean,
   auth: string | undefined,
-  arch: string
+  arch?: string
 ): Promise<IGoVersionInfo | null> {
   let info: IGoVersionInfo | null = null;
   const releases = await tc.getManifestFromRepo(
@@ -200,6 +200,7 @@ export async function getInfoFromManifest(
     info.fileName = rel.files[0].filename;
   }
 
+  console.log(info);
   return info;
 }
 
@@ -226,11 +227,10 @@ async function getInfoFromDist(
 
 export async function findMatch(
   versionSpec: string,
-  arch: string
+  arch?: string
 ): Promise<IGoVersion | undefined> {
   let platFilter = sys.getPlatform();
-
-  core.info(`last ${arch}`);
+  arch = arch ? arch : sys.getArch();
 
   let result: IGoVersion | undefined;
   let match: IGoVersion | undefined;
@@ -329,6 +329,8 @@ export function parseGoVersionFile(versionFilePath: string): string {
 }
 
 function translateArchToDistUrl(arch: string): string {
+  arch = arch ? arch : os.arch()
+
   switch (arch) {
     case 'arm':
       return 'armv6l';
