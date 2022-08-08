@@ -33,10 +33,9 @@ export async function getGo(
   versionSpec: string,
   checkLatest: boolean,
   auth: string | undefined,
-  arch: string
+  arch = sys.getArch()
 ) {
   let osPlat: string = os.platform();
-  let osArch: string = translateArchToDistUrl(arch);
 
   if (checkLatest) {
     core.info('Attempting to resolve the latest version from the manifest...');
@@ -44,7 +43,7 @@ export async function getGo(
       versionSpec,
       true,
       auth,
-      osArch
+      arch
     );
     if (resolvedVersion) {
       versionSpec = resolvedVersion;
@@ -70,9 +69,9 @@ export async function getGo(
   // Try download from internal distribution (popular versions only)
   //
   try {
-      info = await getInfoFromManifest(versionSpec, true, auth, osArch);  
+      info = await getInfoFromManifest(versionSpec, true, auth, arch);  
     if (info) {
-      downloadPath = await installGoVersion(info, auth, osArch);
+      downloadPath = await installGoVersion(info, auth, arch);
     } else {
       core.info(
         'Not found in manifest.  Falling back to download directly from Go'
@@ -97,17 +96,17 @@ export async function getGo(
   // Download from storage.googleapis.com
   //
   if (!downloadPath) {
-    info = await getInfoFromDist(versionSpec, osArch);
-    core.info(`${osArch} ${versionSpec}, 'this is info'`);
+    info = await getInfoFromDist(versionSpec, arch);
+    
     if (!info) {
       throw new Error(
-        `Unable to find Go version '${versionSpec}' for platform ${osPlat} and architecture ${osArch}.`
+        `Unable to find Go version '${versionSpec}' for platform ${osPlat} and architecture ${arch}.`
       );
     }
 
     try {
       core.info('Install from dist');
-      downloadPath = await installGoVersion(info, undefined, osArch);
+      downloadPath = await installGoVersion(info, undefined, arch);
     } catch (err) {
       throw new Error(`Failed to download version ${versionSpec}: ${err}`);
     }
@@ -230,7 +229,7 @@ export async function findMatch(
   arch?: string
 ): Promise<IGoVersion | undefined> {
   let platFilter = sys.getPlatform();
-  arch = arch ? arch : sys.getArch();
+  arch = arch ? translateArchToDistUrl(arch) : sys.getArch();
 
   let result: IGoVersion | undefined;
   let match: IGoVersion | undefined;
@@ -329,7 +328,7 @@ export function parseGoVersionFile(versionFilePath: string): string {
 }
 
 function translateArchToDistUrl(arch: string): string {
-  arch = arch ? arch : os.arch()
+  arch = arch ? arch : sys.getArch()
 
   switch (arch) {
     case 'arm':
