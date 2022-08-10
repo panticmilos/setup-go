@@ -63148,11 +63148,12 @@ function run() {
             const versionSpec = resolveVersionInput();
             const cache = core.getBooleanInput('cache');
             core.info(`Setup go version spec ${versionSpec}`);
+            const arch = core.getInput('architecture');
             if (versionSpec) {
                 let token = core.getInput('token');
                 let auth = !token || cache_utils_1.isGhes() ? undefined : `token ${token}`;
                 const checkLatest = core.getBooleanInput('check-latest');
-                const installDir = yield installer.getGo(versionSpec, checkLatest, auth);
+                const installDir = yield installer.getGo(versionSpec, checkLatest, auth, arch);
                 core.addPath(path_1.default.join(installDir, 'bin'));
                 core.info('Added go to the path');
                 const version = installer.makeSemver(versionSpec);
