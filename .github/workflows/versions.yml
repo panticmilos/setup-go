@@ -10,6 +10,8 @@ on:
       - '**.md'
   schedule:
     - cron: 0 0 * * *
+  workflow_dispatch:
+    
 
 jobs:
   local-cache:
@@ -28,6 +30,7 @@ jobs:
         uses: ./
         with:
           go-version: ${{ matrix.go }}
+          arch: arm
 
       - name: verify go
         run: __tests__/verify-go.sh ${{ matrix.go }}
