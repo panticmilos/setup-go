@@ -62874,7 +62874,7 @@ function getGo(versionSpec, checkLatest, auth, arch = os_1.default.arch()) {
         }
         // check cache
         let toolPath;
-        toolPath = tc.find('go', versionSpec);
+        toolPath = tc.find('go', versionSpec, arch);
         // If not found in cache, download
         if (toolPath) {
             core.info(`Found in cache @ ${toolPath}`);
