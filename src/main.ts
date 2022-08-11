@@ -68,8 +68,10 @@ export async function run() {
     let goVersion = (cp.execSync(`${goPath} version`) || '').toString();
     core.info(goVersion);
 
+    const goCache = cp.execSync('go env GOCACHE');
+    core.info(`Go cache is ${goCache}` );
     core.setOutput('go-version', parseGoVersion(goVersion));
-    core.setOutput('GOCACHE', cp.execSync('go env GOCACHE'))
+    core.setOutput('GOCACHE', goCache)
 
     core.startGroup('go env');
     let goEnv = (cp.execSync(`${goPath} env`) || '').toString();
