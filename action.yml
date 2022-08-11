@@ -24,6 +24,8 @@ outputs:
     description: 'The installed Go version. Useful when given a version range as input.'  
   cache-hit: 
     description: 'A boolean value to indicate if a cache was hit'
+  GOCACHE:
+    description: 'Path of GOCACHE'
 runs:
   using: 'node16'
   main: 'dist/setup/index.js'
