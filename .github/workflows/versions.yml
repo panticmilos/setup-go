@@ -32,6 +32,11 @@ jobs:
       - name: verify go
         run: __tests__/verify-go.sh ${{ matrix.go }}
         shell: bash
+    
+      - name: print cache go
+        run: echo ${{steps.setup_go.outputs.GOCACHE}}
+        shell: bash
+
 
   check-latest:
     runs-on: ${{ matrix.os }}
