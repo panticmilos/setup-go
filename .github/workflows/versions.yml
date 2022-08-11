@@ -34,7 +34,7 @@ jobs:
         shell: bash
     
       - name: print cache go
-        run: echo "${{steps.setup_go.outputs.GOCACHE}}"
+        run: echo "${{steps.setup-go.outputs.GOCACHE}}"
         shell: bash
 
 
