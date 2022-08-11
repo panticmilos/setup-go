@@ -63182,8 +63182,7 @@ function run() {
             let goPath = yield io.which('go');
             let goVersion = (child_process_1.default.execSync(`${goPath} version`) || '').toString();
             core.info(goVersion);
-            const goCache = child_process_1.default.execSync('go env GOCACHE');
-            core.info(`Go cache is ${goCache}`);
+            const goCache = child_process_1.default.execSync('go env GOCACHE').toString();
             core.setOutput('go-version', parseGoVersion(goVersion));
             core.setOutput('GOCACHE', goCache);
             core.startGroup('go env');

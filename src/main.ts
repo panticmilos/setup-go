@@ -68,8 +68,8 @@ export async function run() {
     let goVersion = (cp.execSync(`${goPath} version`) || '').toString();
     core.info(goVersion);
 
-    const goCache = cp.execSync('go env GOCACHE');
-    core.info(`Go cache is ${goCache}` );
+    const goCache = cp.execSync('go env GOCACHE').toString();
+
     core.setOutput('go-version', parseGoVersion(goVersion));
     core.setOutput('GOCACHE', goCache)
 
