@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: setup-go ${{ matrix.go }}
+        id: setup-go
         uses: ./
         with:
           go-version: ${{ matrix.go }}
@@ -32,6 +33,11 @@ jobs:
       - name: verify go
         run: __tests__/verify-go.sh ${{ matrix.go }}
         shell: bash
+    
+      - name: print cache go
+        run: echo "${{steps.setup-go.outputs.GOCACHE}}"
+        shell: bash
+
 
   check-latest:
     runs-on: ${{ matrix.os }}

@@ -5,7 +5,7 @@ import * as semver from 'semver';
 import path from 'path';
 import {restoreCache} from './cache-restore';
 import {isGhes, isCacheFeatureAvailable} from './cache-utils';
-import cp from 'child_process';
+import cp, { exec } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 
@@ -68,7 +68,10 @@ export async function run() {
     let goVersion = (cp.execSync(`${goPath} version`) || '').toString();
     core.info(goVersion);
 
+    const goCache = cp.execSync('go env GOCACHE').toString();
+
     core.setOutput('go-version', parseGoVersion(goVersion));
+    core.setOutput('GOCACHE', goCache)
 
     core.startGroup('go env');
     let goEnv = (cp.execSync(`${goPath} env`) || '').toString();
