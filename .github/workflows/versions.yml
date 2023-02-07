@@ -20,7 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        go: [1.17.9, 1.17.8, 1.17.10, 1.17.7]
+        go: [1.17.9]
+        architecture: [x64, x32]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
