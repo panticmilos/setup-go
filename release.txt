@@ -1,0 +1,15 @@
+Support architecture input
+
+This release introduces support for architecture input for `setup-go` action #253. It also adds support for arm32 architecture for self-hosted runners. If architecture is not provided action will use default runner architecture.
+Example of usage:
+
+ ```yml
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-go@v3
+  with:
+    go-version: '1.16'
+    architecture: arm
+```
+
+This release also provides fix for issue #241. #250 adds support for using explicit filename for Windows which is necessary to satisfy Expand-Archive's requirement on .zip extension.

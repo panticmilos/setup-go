@@ -1,0 +1,47 @@
+Hi everyone! 
+
+Over the last quarter (FY23 Q1), our Akvelon teammates have been supporting our setup-actions and have added a number of new features we'd like to showcase!
+
+## setup-go
+
+### Create dashboard to track performance metrics
+
+- While actions were getting the big number of downloads, we were lacking a way to easily track the performance and the usage of actions in general. Many behaviors can be seen 
+  from graphical representation of the data like success rate, average execution time, distributions of OS per image, errors and etc. These insights can help engineers to realize what are the potential
+  improvements of quality for the action.
+
+  Dashboard can be split in two main parts: `general information` and `precise information` pages.
+
+  General information page:
+
+  Information about all actions and how that data compares to each other. For the example on this page you can see number of runs of each action, success rate of the each action,
+  as well as distribution of OS usage across actions runs. Important thing to emphasize, is that on general page only supported dynamic filter is time filter on the top.
+  So each tile will be presenting data for all of the actions, but for different time intervals. On picture below general information page interface is shown.
+
+  Precise information page:
+
+  Unlike the general information page, this page is able to show data for specific action (actions/setup-go eg.) As shown on the picture below multiple filters are available.
+  On these tiles you can see precise stats like success rate of the specific version of the action, average run time per version, 50/90/99 percentiles etc. One of the tiles that brought
+  useful information to our team, almost immediately, was `The most popular reason of fails across the action version`, since we were able to spot some of the replicating bugs
+  for one of our actions version. Room for improvement for mentioned tile is to be able to classify errors, are they originated from the user or the action itself.
+  On picture below precise information page interface is shown. 
+
+    ```yaml
+        - uses: actions/setup-go@v3
+          with:
+            architecture: 'amd64'
+    ```
+
+- we added arm32 architecture [#106](https://github.com/actions/setup-go/issues/106)
+
+    ```yaml
+        - uses: actions/setup-go@v3
+          with:
+            architecture: 'arm'
+    ```
+
+- voila!
+  
+    <img width="961" alt="KR1 - image" src="https://user-images.githubusercontent.com/4225547/194429114-0d66f3a3-cac4-476f-81b9-0e940145b6ec.png">
+
+With these changes, we now offer more freedom for self-hosted runners to specify different architectures and can support Raspberry PI devices!
